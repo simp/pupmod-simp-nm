@@ -10,6 +10,10 @@
 
 * [`nm`](#nm): Manage NetworkManager
 
+A bare `include nm` installs and runs NetworkManager and changes nothing
+else. Every file the class manages, and every purge, must be requested
+with a parameter.
+
 #### Private Classes
 
 * `nm::install`
@@ -25,6 +29,10 @@
 
 Manage NetworkManager
 
+A bare `include nm` installs and runs NetworkManager and changes nothing
+else. Every file the class manages, and every purge, must be requested
+with a parameter.
+
 #### Parameters
 
 The following parameters are available in the `nm` class:
@@ -32,10 +40,17 @@ The following parameters are available in the `nm` class:
 * [`conf`](#-nm--conf)
 * [`connections`](#-nm--connections)
 * [`purge_connections`](#-nm--purge_connections)
+* [`purge_ifcfg`](#-nm--purge_ifcfg)
+* [`purge_conf_d`](#-nm--purge_conf_d)
 
 ##### <a name="-nm--conf"></a>`conf`
 
 Data type: `Optional[Variant[String[1], Hash[String, Hash]]]`
+
+Content of `NetworkManager.conf`. When unset (the default) the file is
+not managed. Setting it takes ownership of the whole file: anything
+not in this value is removed, and NetworkManager restarts when it
+changes.
 
 If a String:
 Verbatim content of `NetworkManager.conf`.
@@ -59,9 +74,31 @@ Default value: `undef`
 
 Data type: `Boolean`
 
-If `true` unmanaged connections will be purged.
+If `true`, unmanaged connection profiles in
+`/etc/NetworkManager/system-connections` are removed.
 
-Default value: `true`
+Default value: `false`
+
+##### <a name="-nm--purge_ifcfg"></a>`purge_ifcfg`
+
+Data type: `Boolean`
+
+If `true`, manage `/etc/sysconfig/network-scripts` and remove every file
+in it that Puppet does not manage (except `readme-ifcfg-rh.txt`), to
+prevent conflicts between `ifcfg-*` files and `.nmconnection` files.
+When `false` the directory is not managed.
+
+Default value: `false`
+
+##### <a name="-nm--purge_conf_d"></a>`purge_conf_d`
+
+Data type: `Boolean`
+
+If `true`, manage `/etc/NetworkManager/conf.d` and remove every
+drop-in file in it that Puppet does not manage. When `false` the
+directory is not managed.
+
+Default value: `false`
 
 ## Defined types
 
@@ -75,6 +112,9 @@ The following parameters are available in the `nm::connection` defined type:
 
 * [`content`](#-nm--connection--content)
 * [`ensure`](#-nm--connection--ensure)
+* [`activate`](#-nm--connection--activate)
+* [`connection_id`](#-nm--connection--connection_id)
+* [`replaces_ifcfg`](#-nm--connection--replaces_ifcfg)
 
 ##### <a name="-nm--connection--content"></a>`content`
 
@@ -97,3 +137,40 @@ Data type: `Enum['present', 'absent']`
 If connection file should be present or absent.
 
 Default value: `'present'`
+
+##### <a name="-nm--connection--activate"></a>`activate`
+
+Data type: `Boolean`
+
+When `true` and `ensure` is `present`, (re)activate the connection with
+`nmcli connection up` after NetworkManager has reloaded its profiles, so a
+changed keyfile takes effect on a connection that is already active. By
+default the change only takes effect the next time the connection is
+activated.
+
+Re-activating the connection that the Puppet agent itself uses interrupts
+it briefly, and activating the wrong profile can cut the host off from the
+network. Use it with care on remote hosts.
+
+Default value: `false`
+
+##### <a name="-nm--connection--connection_id"></a>`connection_id`
+
+Data type: `Optional[String[1]]`
+
+The connection `id` that `activate` passes to `nmcli connection up`. When
+unset, `$content['connection']['id']` is used if `content` is a Hash that
+has it, otherwise the title of the resource.
+
+Default value: `undef`
+
+##### <a name="-nm--connection--replaces_ifcfg"></a>`replaces_ifcfg`
+
+Data type: `Optional[Pattern[/\A[A-Za-z0-9][A-Za-z0-9_.:@-]*\z/]]`
+
+The name of a device whose `/etc/sysconfig/network-scripts/ifcfg-<device>`
+file is removed when `ensure` is `present`, so the profile it describes
+does not exist alongside this keyfile. Removing a file that does not
+exist, or from a directory that does not exist, is not an error.
+
+Default value: `undef`

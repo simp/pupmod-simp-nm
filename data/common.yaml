@@ -1,4 +1,1 @@
----
-nm::conf:
-  main: {}
-  logging: {}
+--- {}

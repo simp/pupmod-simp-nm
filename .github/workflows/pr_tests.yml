@@ -150,6 +150,7 @@ jobs:
       - reference
       - releng-checks
       - spec-tests
+      - acceptance
     runs-on: ubuntu-latest
     steps:
       - name: 'Fail unless every needed job succeeded'
@@ -159,3 +160,30 @@ jobs:
           jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<< "$NEEDS"
           jq -e 'all(.[]; .result == "success")' <<< "$NEEDS" > /dev/null
 
+  acceptance:
+    runs-on:
+      - ubuntu-latest
+    strategy:
+      matrix:
+        node:
+          - almalinux8
+          - almalinux10
+      fail-fast: false
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v7
+      - name: 'Install Ruby'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0.9'
+      - name: bundle install
+        run: |
+          bundle install
+      - name: Setup libvirt for Vagrant
+        uses: simp/gha-workflows/.github/actions/setup-vagrant-libvirt@v1.1.0
+      - name: beaker
+        env:
+          BEAKER_HYPERVISOR: 'vagrant_libvirt'
+          VAGRANT_DEFAULT_PROVIDER: 'libvirt'
+        run: |
+          bundle exec rake beaker:suites[default,${{ matrix.node }}]
