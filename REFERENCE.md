@@ -75,6 +75,9 @@ The following parameters are available in the `nm::connection` defined type:
 
 * [`content`](#-nm--connection--content)
 * [`ensure`](#-nm--connection--ensure)
+* [`activate`](#-nm--connection--activate)
+* [`connection_id`](#-nm--connection--connection_id)
+* [`replaces_ifcfg`](#-nm--connection--replaces_ifcfg)
 
 ##### <a name="-nm--connection--content"></a>`content`
 
@@ -97,3 +100,40 @@ Data type: `Enum['present', 'absent']`
 If connection file should be present or absent.
 
 Default value: `'present'`
+
+##### <a name="-nm--connection--activate"></a>`activate`
+
+Data type: `Boolean`
+
+When `true` and `ensure` is `present`, (re)activate the connection with
+`nmcli connection up` after NetworkManager has reloaded its profiles, so a
+changed keyfile takes effect on a connection that is already active. By
+default the change only takes effect the next time the connection is
+activated.
+
+Re-activating the connection that the Puppet agent itself uses interrupts
+it briefly, and activating the wrong profile can cut the host off from the
+network. Use it with care on remote hosts.
+
+Default value: `false`
+
+##### <a name="-nm--connection--connection_id"></a>`connection_id`
+
+Data type: `Optional[String[1]]`
+
+The connection `id` that `activate` passes to `nmcli connection up`. When
+unset, `$content['connection']['id']` is used if `content` is a Hash that
+has it, otherwise the title of the resource.
+
+Default value: `undef`
+
+##### <a name="-nm--connection--replaces_ifcfg"></a>`replaces_ifcfg`
+
+Data type: `Optional[Pattern[/\A[A-Za-z0-9][A-Za-z0-9_.:@-]*\z/]]`
+
+The name of a device whose `/etc/sysconfig/network-scripts/ifcfg-<device>`
+file is removed when `ensure` is `present`, so the profile it describes
+does not exist alongside this keyfile. Removing a file that does not
+exist, or from a directory that does not exist, is not an error.
+
+Default value: `undef`

@@ -3,6 +3,10 @@
   `nm::connection` defined type keep their names and parameters.
 - Restart NetworkManager when `NetworkManager.conf` changes
 - Allow puppet/extlib 8.x
+- Add `nm::connection` parameters `activate` and `connection_id`, to apply a
+  changed profile to an active connection (off by default)
+- Add `nm::connection` parameter `replaces_ifcfg`, to remove the `ifcfg` file
+  for the same device (off by default)
 - Require puppetlabs/stdlib 9 or later, for `stdlib::ensure_packages`
 
 * Sat Dec 02 2023 Joshua Hoblitt <josh@hoblitt.com> - 0.3.0

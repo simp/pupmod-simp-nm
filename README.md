@@ -38,6 +38,31 @@ nm::connection { 'eth0':
 }
 ```
 
+`nm::connection` can also apply a change to a live device and retire the
+`ifcfg` profile that an installer wrote for the same device:
+
+```puppet
+nm::connection { 'eth0':
+  content        => {
+    'connection' => {
+      'id'             => 'eth0',
+      'type'           => 'ethernet',
+      'interface-name' => 'eth0',
+    },
+  },
+  activate       => true,
+  replaces_ifcfg => 'eth0',
+}
+```
+
+With `activate => true`, `nmcli connection up id <id>` runs after
+NetworkManager reloads its profiles. `<id>` is `connection_id`, else
+`content['connection']['id']`, else the resource title. Re-activating the
+connection the Puppet agent uses interrupts it briefly, and activating the
+wrong profile can cut the host off. `replaces_ifcfg` removes
+`/etc/sysconfig/network-scripts/ifcfg-<device>` in the same run. Both are off
+by default.
+
 By default the `nm` class removes every connection profile, `ifcfg` file and
 `NetworkManager/conf.d` drop-in that Puppet does not manage. Set
 `nm::purge_connections` to `false` to keep unmanaged connection profiles.
