@@ -10,6 +10,10 @@
 
 * [`nm`](#nm): Manage NetworkManager
 
+A bare `include nm` installs and runs NetworkManager and changes nothing
+else. Every file the class manages, and every purge, must be requested
+with a parameter.
+
 #### Private Classes
 
 * `nm::install`
@@ -25,6 +29,10 @@
 
 Manage NetworkManager
 
+A bare `include nm` installs and runs NetworkManager and changes nothing
+else. Every file the class manages, and every purge, must be requested
+with a parameter.
+
 #### Parameters
 
 The following parameters are available in the `nm` class:
@@ -32,10 +40,17 @@ The following parameters are available in the `nm` class:
 * [`conf`](#-nm--conf)
 * [`connections`](#-nm--connections)
 * [`purge_connections`](#-nm--purge_connections)
+* [`purge_ifcfg`](#-nm--purge_ifcfg)
+* [`purge_conf_d`](#-nm--purge_conf_d)
 
 ##### <a name="-nm--conf"></a>`conf`
 
 Data type: `Optional[Variant[String[1], Hash[String, Hash]]]`
+
+Content of `NetworkManager.conf`. When unset (the default) the file is
+not managed. Setting it takes ownership of the whole file: anything
+not in this value is removed, and NetworkManager restarts when it
+changes.
 
 If a String:
 Verbatim content of `NetworkManager.conf`.
@@ -59,9 +74,31 @@ Default value: `undef`
 
 Data type: `Boolean`
 
-If `true` unmanaged connections will be purged.
+If `true`, unmanaged connection profiles in
+`/etc/NetworkManager/system-connections` are removed.
 
-Default value: `true`
+Default value: `false`
+
+##### <a name="-nm--purge_ifcfg"></a>`purge_ifcfg`
+
+Data type: `Boolean`
+
+If `true`, manage `/etc/sysconfig/network-scripts` and remove every file
+in it that Puppet does not manage (except `readme-ifcfg-rh.txt`), to
+prevent conflicts between `ifcfg-*` files and `.nmconnection` files.
+When `false` the directory is not managed.
+
+Default value: `false`
+
+##### <a name="-nm--purge_conf_d"></a>`purge_conf_d`
+
+Data type: `Boolean`
+
+If `true`, manage `/etc/NetworkManager/conf.d` and remove every
+drop-in file in it that Puppet does not manage. When `false` the
+directory is not managed.
+
+Default value: `false`
 
 ## Defined types
 

@@ -4,6 +4,18 @@
 - Restart NetworkManager when `NetworkManager.conf` changes
 - Allow puppet/extlib 8.x
 - Require puppetlabs/stdlib 9 or later, for `stdlib::ensure_packages`
+- Fix `nm::purge_connections` leaving a purged profile loaded in NetworkManager
+  until something else reloaded it
+- **BREAKING** (relative to `lsst-nm`): `nm::purge_connections` now defaults to
+  `false`. Set it to `true` to remove unmanaged connection profiles.
+- **BREAKING** (relative to `lsst-nm`): `/etc/sysconfig/network-scripts` is no
+  longer managed or purged. Set the new `nm::purge_ifcfg` to `true` to purge it.
+- **BREAKING** (relative to `lsst-nm`): `/etc/NetworkManager/conf.d` is no
+  longer managed or purged. Set the new `nm::purge_conf_d` to `true` to purge it.
+- **BREAKING** (relative to `lsst-nm`): `NetworkManager.conf` is no longer
+  managed unless `nm::conf` is set, and setting it takes ownership of the
+  whole file. To restore the old default, set `nm::conf` to
+  `{main: {}, logging: {}}`.
 
 * Sat Dec 02 2023 Joshua Hoblitt <josh@hoblitt.com> - 0.3.0
 - Add the `nm::purge_connections` parameter
