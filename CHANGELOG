@@ -4,6 +4,10 @@
 - Restart NetworkManager when `NetworkManager.conf` changes
 - Allow puppet/extlib 8.x
 - Require puppetlabs/stdlib 9 or later, for `stdlib::ensure_packages`
+- Allow puppetlabs/stdlib 10.x
+- Support EL 8, 9 and 10 (RedHat, CentOS Stream, AlmaLinux, Rocky, OracleLinux)
+- Require OpenVox 8 or 9 (replaces the `puppet` requirement)
+- Drop support for CentOS 7
 
 * Sat Dec 02 2023 Joshua Hoblitt <josh@hoblitt.com> - 0.3.0
 - Add the `nm::purge_connections` parameter
